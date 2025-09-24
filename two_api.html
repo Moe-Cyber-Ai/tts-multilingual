@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multilingual TTS App</title>
+  <style>
+    :root {
+      --bg-light: #ffffff;
+      --bg-dark: #121212;
+      --text-light: #000000;
+      --text-dark: #f1f1f1;
+      --box-bg-light: #f9f9f9;
+      --box-bg-dark: #1f1f1f;
+      --accent: #333;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .tts-box {
+      background-color: var(--box-bg-light);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 600px;
+      max-width: 90%;
+      transition: background-color 0.3s;
+    }
+
+    body.dark-mode .tts-box {
+      background-color: var(--box-bg-dark);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-weight: 500;
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: none;
+      box-sizing: border-box;
+      background-color: white;
+    }
+
+    body.dark-mode textarea {
+      background-color: #2a2a2a;
+      color: var(--text-dark);
+      border: 1px solid #444;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .lesson-row {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Header & Controls */
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 30px;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0;
+      right: 0; bottom: 0;
+      background-color: #ccc;
+      border-radius: 26px;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #444;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .font-size-control input {
+      width: 150px;
+    }
+
+    @media (max-width: 768px) {
+      .tts-box {
+        width: 90%;
+      }
+
+      .lesson-row {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-controls">
+    <div class="toggle-container">
+      <span>Dark Mode</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="darkModeSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="font-size-control">
+      <label for="fontSizeSlider">Text Size</label>
+      <input type="range" id="fontSizeSlider" min="14" max="24" value="16" />
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- General TTS Top Center -->
+    <div class="tts-box">
+      <h2>General TTS</h2>
+      <textarea id="textInput" placeholder="Enter multilingual text..."></textarea>
+      <div class="buttons">
+        <button onclick="sendTextToTTS()">Play</button>
+        <button onclick="saveAudio()">Save</button>
+      </div>
+      <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <!-- German + Russian Row -->
+    <div class="lesson-row">
+      <!-- German Lesson -->
+      <div class="tts-box">
+        <h2>German Lesson</h2>
+        <textarea id="germanLessonInput" placeholder='Example: "Hello!" → "Hallo!"'></textarea>
+        <div class="buttons">
+          <button onclick="sendGermanLesson()">Play</button>
+          <button onclick="saveAudio('german')">Save</button>
+        </div>
+        <audio id="germanAudioPlayer" controls></audio>
+      </div>
+
+      <!-- Russian Lesson -->
+      <div class="tts-box">
+        <h2>Russian Lesson</h2>
+        <textarea id="russianLessonInput" placeholder='Example: "Good morning!" → "Доброе утро!"'></textarea>
+        <div class="buttons">
+          <button onclick="sendRussianLesson()">Play</button>
+          <button onclick="saveAudio('russian')">Save</button>
+        </div>
+        <audio id="russianAudioPlayer" controls></audio>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const baseURL = "http://127.0.0.1:5000";
+
+    document.getElementById("darkModeSwitch").addEventListener("change", () => {
+      document.body.classList.toggle("dark-mode");
+    });
+
+    document.getElementById("fontSizeSlider").addEventListener("input", function () {
+      const size = this.value + "px";
+      document.querySelectorAll("textarea").forEach(t => t.style.fontSize = size);
+    });
+
+    async function fetchTTS(apiPath, text, audioElementId) {
+      if (!text) return alert("Please enter text!");
+      const formData = new FormData();
+      formData.append("text", text);
+
+      const response = await fetch(`${baseURL}${apiPath}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        alert("Error: " + (err.error || "Unknown issue"));
+        return;
+      }
+
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audioElement = document.getElementById(audioElementId);
+      audioElement.src = audioUrl;
+      audioElement.play();
+      window[`latestAudioBlob_${audioElementId}`] = blob;
+    }
+
+    function sendTextToTTS() {
+      const text = document.getElementById("textInput").value;
+      fetchTTS("/tts", text, "audioPlayer");
+    }
+
+    function sendGermanLesson() {
+      const text = document.getElementById("germanLessonInput").value;
+      fetchTTS("/tts_german_lesson", text, "germanAudioPlayer");
+    }
+
+    function sendRussianLesson() {
+      const text = document.getElementById("russianLessonInput").value;
+      fetchTTS("/tts_russian_lesson", text, "russianAudioPlayer");
+    }
+
+    function saveAudio(type = "general") {
+      const idMap = {
+        general: "audioPlayer",
+        german: "germanAudioPlayer",
+        russian: "russianAudioPlayer"
+      };
+      const blob = window[`latestAudioBlob_${idMap[type]}`];
+      if (!blob) return alert("No audio generated!");
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${type}_lesson.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>
